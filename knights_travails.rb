@@ -4,9 +4,18 @@ class Board
     @vertices = [0, 1, 2, 3, 4, 5, 6, 7].product([0, 1, 2, 3, 4, 5, 6, 7])
   end
 
-  def knight_moves(position, destination = nil)
+  def knight_moves(position, destination)
     knight = Knight.new(position)
-    p knight.possible_moves
+    path = []
+
+    until knight.position == destination
+      path << knight.position
+      knight = Knight.new(knight.possible_moves.sample)
+    end
+    path << destination
+
+    puts "You made it in #{path.size - 1} moves! Here is your path: "
+    path.each {|pos| p pos}
   end 
 end
 
@@ -33,4 +42,4 @@ end
 
 board = Board.new
 
-board.knight_moves([0, 0])
+board.knight_moves([0, 0], [1, 2])
