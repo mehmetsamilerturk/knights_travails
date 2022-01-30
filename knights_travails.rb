@@ -1,21 +1,20 @@
 # frozen_string_literal: true
 
 class Board
-  attr_reader :vertices
-
   def initialize
     @moves = [[1, 2], [2, 1], [-1, 2], [2, -1], [-2, -1], [-1, -2], [-2, 1], [1, -2]]
   end
 
   def knight_moves(position, destination, current = generate_possible_moves(position))
     path = []
-    result = level_order(current, destination)
+    result = level_order(current)
     path << current.position
     i = 0
     until result.include?(destination)
+      break if current.possible_moves[i].nil?
       current = generate_possible_moves(current.possible_moves[i].position)
       path << current.position
-      result = level_order(current, destination)
+      result = level_order(current)
       i += 1
     end
     path << destination
@@ -34,7 +33,7 @@ class Board
     knight
   end
 
-  def level_order(current = nil, _destination = nil, queue = [], list = [])
+  def level_order(current = nil, queue = [], list = [])
     return if current.nil?
 
     queue.push << current
@@ -63,4 +62,4 @@ end
 
 board = Board.new
 
-board.knight_moves([3, 3], [4, 3])
+board.knight_moves([3, 3], [0, 0])
