@@ -1,45 +1,66 @@
+# frozen_string_literal: true
+
 class Board
   attr_reader :vertices
+
   def initialize
-    @vertices = [0, 1, 2, 3, 4, 5, 6, 7].product([0, 1, 2, 3, 4, 5, 6, 7])
+    @moves = [[1, 2], [2, 1], [-1, 2], [2, -1], [-2, -1], [-1, -2], [-2, 1], [1, -2]]
   end
 
-  def knight_moves(position, destination)
-    knight = Knight.new(position)
+  def knight_moves(position, destination, current = generate_possible_moves(position))
     path = []
-
-    until knight.position == destination
-      path << knight.position
-      knight = Knight.new(knight.possible_moves.sample)
+    result = level_order(current, destination)
+    path << current.position
+    i = 0
+    until result.include?(destination)
+      current = generate_possible_moves(current.possible_moves[i].position)
+      path << current.position
+      result = level_order(current, destination)
+      i += 1
     end
     path << destination
-
     puts "You made it in #{path.size - 1} moves! Here is your path: "
-    path.each {|pos| p pos}
-  end 
+    path.each { |pos| p pos }
+  end
+
+  def generate_possible_moves(position)
+    knight = Knight.new(position)
+    @moves.each do |move|
+      if (move[0] + knight.position[0]).between?(0, 7) && (move[1] + knight.position[1]).between?(0, 7)
+        knight.possible_moves << Knight.new([knight.position[0] + move[0], knight.position[1] + move[1]])
+      end
+    end
+
+    knight
+  end
+
+  def level_order(current = nil, _destination = nil, queue = [], list = [])
+    return if current.nil?
+
+    queue.push << current
+
+    until queue.empty?
+      current = queue.first
+      list.push(current.position)
+
+      8.times do |i|
+        queue.push(current.possible_moves[i]) unless current.possible_moves[i].nil?
+      end
+      queue.shift
+    end
+    list
+  end
 end
 
 class Knight
-  attr_accessor :moves, :position, :possible_moves
+  attr_accessor :position, :possible_moves
 
-  def initialize(position)  
-    @moves = [ [1, 2], [2, 1], [-1, 2], [2, -1], [-2, -1], [-1, -2], [-2, 1], [1, -2] ]
+  def initialize(position)
     @position = position
-    @possible_moves = generate_possible_moves
-  end
-
-  def generate_possible_moves
-    result = []
-
-    @moves.each do |move|
-      if (move[0] + @position[0]).between?(0, 7) && (move[1] + @position[1]).between?(0, 7)
-        result << [@position[0] + move[0], @position[1] + move[1]]
-      end
-    end
-    result
+    @possible_moves = []
   end
 end
 
 board = Board.new
 
-board.knight_moves([0, 0], [1, 2])
+board.knight_moves([3, 3], [4, 3])
